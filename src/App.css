@@ -1,38 +1,54 @@
 .App {
-  text-align: center;
+  font-family: sans-serif;
+  height: 100vh;  
+  width: 100vw; 
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
+.channel-wrap{
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
+  height: 100%;
+}
+
+.channel-list,
+.channel-chat{
+  float: left;
+}
+
+.channel-chat{
+  width: 76%;
+  float: right;
+}
+
+li {
+  cursor: pointer;
+  list-style-type: none;
+  font-family: sans-serif;
+}
+
+.MuiTypography-root.MuiCardHeader-title.MuiTypography-body2.MuiTypography-displayBlock,
+.MuiTypography-root.MuiTypography-body2{
+  text-align: left;
+}
+
+.MuiButtonBase-root.MuiButton-root.MuiButton-contained.MuiButton-containedSizeSmall.MuiButton-sizeSmall{
+  background-color:var(--sendbird-light-primary-300);
   color: white;
 }
 
-.App-link {
-  color: #61dafb;
+.user-message__options-btn {
+  height: 32px;
+  width: 32px;
+  border-radius: 25px;
+  border: 2px solid #6210CC;
+  position: absolute;
+  display: inline-block;
+  right: 10px;
+  top: 8px;
+  font-weight: bold;
+  cursor: pointer;
+  background-color: white;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+#icon-button-file{
+  display: none !important;
 }

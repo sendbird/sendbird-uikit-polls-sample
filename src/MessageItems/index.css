@@ -1,0 +1,208 @@
+.customized-message-item {
+  position: relative;
+}
+
+.user-message__text-area {
+  margin: 0px;
+  border-radius: 4px;
+}
+
+.MuiInputBase-root.MuiFilledInput-root.MuiFilledInput-underline.MuiInputBase-formControl.MuiInputBase-multiline.MuiFilledInput-multiline {
+  background-color: white;
+  box-shadow: var(--sendbird-light-shadow-02);
+  width: 300px;
+  border: 2px solid #6210cc;
+}
+
+.voting-message .MuiCardContent-root {
+  padding-top: 0px;
+}
+
+.voting-message .MuiCardContent-root .MuiTypography-root.MuiTypography-body2 {
+  font-weight: 550;
+  font-size: 0.875rem;
+  font-family: "Roboto", "Helvetica", "Arial", sans-serif;
+  line-height: 1.43;
+  letter-spacing: -0.01071em;
+  border-left: 2px solid #6210cc;
+  padding-left: 10px;
+}
+
+#option-number-text {
+  font-weight: bold;
+  display: inline;
+}
+
+#add-options-btn,
+#delete-btn,
+#option-submit-btn,
+#option-cancel-btn,
+#add_suggested_task_save_btn {
+  border-radius: 5px;
+  border: 1px solid #6210cc;
+  background-color: #6210cc;
+  color: white;
+  padding: 3px 6px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+#option-submit-btn,
+#option-cancel-btn {
+  margin-top: 10px;
+  margin-right: 5px;
+}
+
+#add-options-btn {
+  margin-top: 10px;
+}
+
+#options-wrapper {
+  font-weight: initial;
+  display: inline;
+  width: 100%;
+}
+
+#option-vote-count {
+  border-radius: 5px;
+  border: 1px solid #6210cc;
+  margin-left: 20px;
+  padding: 3px 6px;
+  color: #6210cc;
+  font-weight: bold;
+  display: inline;
+  font-size: 0.8rem;
+}
+#vote-btn {
+  border-radius: 5px;
+  border: 1px solid #6210cc;
+  margin-right: 10px;
+  margin-top: -22px;
+  padding: 3px 6px !important;
+  cursor: pointer;
+  font-weight: bold;
+  float: right;
+  display: inline;
+}
+
+#option-form,
+#option-title {
+  margin-top: 10px;
+  margin-bottom: 0;
+}
+
+#vote-button-wrap {
+  display: inline-block;
+}
+
+#vote-buttons-wrapper {
+  margin-top: 10px;
+}
+
+.MuiPaper-root.MuiCard-root.MuiPaper-elevation1.MuiPaper-rounded {
+  position: relative;
+}
+.message-options-wrap {
+  margin: 0px;
+  padding: 5px;
+  border-radius: 4px;
+  position: absolute;
+  display: inline-block;
+  right: 6px;
+  top: 26px;
+}
+
+.sendbird_dropdown_menu {
+  width: 100px;
+  min-height: 40px;
+  padding: 5px;
+  border: 2px solid #6210cc;
+  border-radius: 4px;
+  display: inline-block;
+  font-size: 0.875rem;
+  font-weight: 400;
+  font-family: "Roboto", "Helvetica", "Arial", sans-serif;
+  line-height: 1.43;
+  letter-spacing: 0.01071em;
+  color: white !important;
+  background-color: #6210cc;
+}
+
+.voting-message .user-message__text-area {
+  bottom: 150px;
+  left: 0px;
+  position: relative;
+  display: inline-block;
+}
+
+.bg-modal {
+  width: 100%;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.7);
+  position: fixed;
+  z-index: 1;
+  top: 0;
+  right: 0px;
+  display: none;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-content {
+  width: 300px;
+  height: 250px;
+  background-color: white;
+  border-radius: 4px;
+  padding: 20px;
+  position: absolute;
+}
+
+#suggestion-task-form-title {
+  margin-left: 26px;
+  margin-top: 30px;
+}
+
+#add_suggested_task_save_btn {
+  margin-top: 15px;
+  margin-left: 26px;
+}
+
+#options-label {
+  float: left;
+  margin: 15px 0px 5px 26px;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+#suggestion_form_input {
+  width: 80%;
+  display: block;
+  margin: 0 auto;
+}
+
+.add_suggested_task_close_btn,
+.delete_option_form_close_btn {
+  position: absolute;
+  top: 0;
+  right: 14px;
+  font-size: 42px;
+  transform: rotate(45deg);
+  cursor: pointer;
+}
+
+.modal-content.option-form {
+  height: revert;
+}
+
+#delete-option-submit-button {
+  margin-top: 20px;
+}
+
+#update-form-title {
+  margin-left: 26px;
+}
+
+.modal-content.update-form {
+  height: revert !important;
+  padding: 40px 10px;
+}
