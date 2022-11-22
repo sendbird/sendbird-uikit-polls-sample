@@ -11,7 +11,7 @@ import UpdatePollForm from "./UpdatePollForm";
 import DeleteOptionForm from "./DeleteOptionForm";
 import { PollVoteEvent } from "@sendbird/chat/poll";
 
-export default function VotingMessage(props) {
+export default function PollMessage(props) {
   const {
     message,
     userId,

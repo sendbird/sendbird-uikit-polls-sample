@@ -3,7 +3,7 @@ import AdminMessage from "./MessageItems/AdminMessage";
 import FileMessage from "./MessageItems/FileMessage";
 import UserMessage from "./MessageItems/UserMessage";
 import "./index.css";
-import VotingMessage from "./MessageItems/VotingMessage";
+import PollMessage from "./MessageItems/PollMessage";
 
 export default function CustomizedMessageItem(props) {
   const {
@@ -26,7 +26,7 @@ export default function CustomizedMessageItem(props) {
       );
     } else if (message._poll) {
       return () => (
-        <VotingMessage
+        <PollMessage
           message={message}
           userId={userId}
           updateUserMessage={updateUserMessage}
