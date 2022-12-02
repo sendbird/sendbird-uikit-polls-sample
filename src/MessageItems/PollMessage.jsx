@@ -27,7 +27,8 @@ export default function PollMessage(props) {
   const [showDeleteOptionsForm, setShowDeleteOptionsForm] = useState(false);
   const [optionsValue, setOptionsValue] = useState("");
   const [updateMessage, setMessageUpdate] = useState({});
-  let pollData = props.pollData;
+  const [updatedMsg, setUpdatedMsg] = useState({});
+  let pollData = [];
   let style = {};
   let poll = message._poll;
 
@@ -115,6 +116,25 @@ export default function PollMessage(props) {
     setOptionsValue("");
   }
 
+  async function getVoters(messageId, pollId, updatedVoteCounts, message) {
+    let optionIds = updatedVoteCounts.map((option) => {
+      return option.option_id;
+    });
+    pollData[messageId] = {
+      message: message,
+    };
+    for (const optionId of optionIds) {
+      const query = currentChannel.createPollVoterListQuery(pollId, optionId);
+      const voters = await query.next();
+      pollData[messageId][optionId] = {
+        voters: voters,
+        vote_count: voters.length,
+      };
+    }
+    setUpdatedMsg(pollData);
+    console.log("Poll Data AFTER RESETTING TO NEW VOTE=", pollData);
+  }
+
   async function handleVote(e) {
     e.preventDefault();
     let optionTitleClicked = e.target.innerText;
@@ -154,9 +174,10 @@ export default function PollMessage(props) {
           };
           const updatedMessage = await sb.message.getMessage(params);
           setMessageUpdate(updatedMessage);
-
           message._poll.options = updatedMessage._poll.options;
           console.log("set in poll msg =", message._poll.options);
+          let updatedVoteCounts = e._payload.updated_vote_counts;
+          getVoters(messageId, pollId, updatedVoteCounts, message);
         });
     }
   }
@@ -220,16 +241,21 @@ export default function PollMessage(props) {
               {poll.options &&
                 poll.options.map(function (option) {
                   style = { backgroundColor: "white", color: "#6210cc" };
-                  // if(pollData[message.messageId]){
-                  //   console.log('There is poll data')
-                  //   console.log(pollData[message.messageId][option.id])
-                  //   let currentUserVoted = pollData[message.messageId][option.id].voters =( (voter) => voter.userId === userId)
-                  //   console.log('CURRENT USER VOTED=', currentUserVoted)
-                  //   if (currentUserVoted) {
-                  //     console.log('The current user voted so set style')
-                  //     style = { backgroundColor: "#6210cc", color: "white" };
-                  //  }
-                  // }
+                  let msgId = poll.messageId;
+                  if (updatedMsg && updatedMsg[msgId]) {
+                    if (
+                      updatedMsg[msgId][option.id] &&
+                      updatedMsg[msgId][option.id].voters !== undefined
+                    ) {
+                      let voters = updatedMsg[msgId][option.id].voters;
+                      let currentUserVoted = voters.some(
+                        (voter) => voter.userId === userId
+                      );
+                      if (currentUserVoted) {
+                        style = { backgroundColor: "#6210cc", color: "white" };
+                      }
+                    }
+                  }
 
                   return (
                     <div id="options-wrapper" key={option.id}>

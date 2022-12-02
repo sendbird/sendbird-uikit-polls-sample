@@ -46,7 +46,6 @@ function CustomizedApp({ userId, appId, sb }) {
     for (const optionId of optionIds) {
       const query = currentChannel.createPollVoterListQuery(pollId, optionId);
       const voters = await query.next();
-      // voters obj for each option 
         pollData[messageId][optionId] = {
           voters: voters,
           vote_count: voters.length,
@@ -60,18 +59,11 @@ function CustomizedApp({ userId, appId, sb }) {
     UNIQUE_HANDLER_ID,
     groupChannelHandler
   );
-//update poll being passed in when message updates -> use this to disiplay correct votes after voting
-  //not called when poll is changed/voted on? -> but the message is updating the message._poll?
-  // groupChannelHandler.onMessageUpdated = (channel, message)=>{
-  //   console.log('message after update=', message)
-  // }
 
-//on vote event, update message._poll so that it will trigger the UI to change on the screen
   groupChannelHandler.onPollVoted = async (channel, event) => {
    console.log("onPollVoted event=", event);
     let messageId = event.messageId;
     let pollId = event.pollId;
-    //the votes that are being changed
     let updatedVoteCounts = event._payload.updated_vote_counts;
     let channelType = event._payload.channel_type;
    pollData[messageId] = undefined;
@@ -81,20 +73,11 @@ function CustomizedApp({ userId, appId, sb }) {
       channelUrl: currentChannelUrl,
     };
     const message = await sb.message.getMessage(params);
-    console.log('message=', message)
     setUpdatedMessage(message)
-    console.log("pollData[messageId]=", pollData[messageId]);
     if (pollData[messageId] === undefined) {
       getVoters( messageId, pollId, updatedVoteCounts, message);
     }
   };
-  /*
-Shows each option that has votes-> Returns the option user voted on & the option user previously voted on w/ updated counts
-OPT ID: 148 = 1 ;  149 = 2  ; 150 = 3
-*/
-  // useEffect(() => {
-  //   console.log('vote updates message to=',  updatedMessage )
-  // }, [ updatedMessage]);
 
   return (
     <div className="channel-wrap">
