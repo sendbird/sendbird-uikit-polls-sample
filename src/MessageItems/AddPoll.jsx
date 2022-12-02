@@ -29,7 +29,7 @@ export default function AddPoll({
               changeMessageText(event.target.value);
             }}
           ></input>
-          <label for="options" id="options-label">Options:</label>
+          <label htmlFor="options" id="options-label">Options:</label>
           <input
             type="text"
             id="suggestion_form_input"

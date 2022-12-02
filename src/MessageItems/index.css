@@ -91,6 +91,10 @@
   margin-bottom: 0;
 }
 
+#option-title {
+  font-weight: normal;
+}
+
 #vote-button-wrap {
   display: inline-block;
 }

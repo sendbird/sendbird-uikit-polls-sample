@@ -68,7 +68,7 @@ function CustomizedMessageInput({ appId, sb }) {
       params.message = inputText;
       sendUserMessage(channel, params)
         .onSucceeded((message) => {
-          console.log(message);
+          // console.log(message);
           setInputText("");
         })
         .onFailed((error) => {

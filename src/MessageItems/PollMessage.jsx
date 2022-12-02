@@ -17,7 +17,8 @@ export default function PollMessage(props) {
     userId,
     updateUserMessage,
     currentChannel,
-     sb,
+    sb,
+    setPollData,
   } = props;
   const [messageText, changeMessageText] = useState(message.message);
   const [dropdownOptions, setDropdownOptions] = useState(false);
@@ -25,12 +26,18 @@ export default function PollMessage(props) {
   const [showOptionsForm, setShowOptionsForm] = useState(false);
   const [showDeleteOptionsForm, setShowDeleteOptionsForm] = useState(false);
   const [optionsValue, setOptionsValue] = useState("");
+  const [updateMessage, setMessageUpdate] = useState({});
+  let pollData = props.pollData;
+  let style = {};
   let poll = message._poll;
 
+  //WHEN ADDING SHOW WHO VOTED, only show up to 5 people who voted under each option
+  //if over 5, show the 5 ppl then ',..'
+
   const openDropdown = () => {
-    if(poll.createdBy === userId){
+    if (poll.createdBy === userId) {
       setDropdownOptions(!dropdownOptions);
-    } 
+    }
   };
 
   const toggleOptionsForm = () => {
@@ -77,7 +84,7 @@ export default function PollMessage(props) {
   async function updatePoll(e) {
     e.preventDefault();
     const updateParams = {
-      title: messageText
+      title: messageText,
     };
     await currentChannel.updatePoll(poll.id, updateParams);
     const userMessageParams = {};
@@ -114,13 +121,13 @@ export default function PollMessage(props) {
     let option = poll.options.find(
       (option) => option.text === optionTitleClicked
     );
+    let pollOptionId = option.id;
     let newVoteCount = option.voteCount + 1;
     const updatedVoteCounts = {
       voteCount: newVoteCount,
-      optionId: option.id,
+      optionId: pollOptionId,
     };
-    //Array of option ids to cast votes on. Any option ids that are in the list will be casted vote, and option ids that are not in the list will be cancelled vote.
-    let pollOptionIds = [option.id];
+    let pollOptionIds = [pollOptionId];
     let pollId = poll.id;
     let ts = Date.now();
     let messageId = message.id;
@@ -130,45 +137,30 @@ export default function PollMessage(props) {
       pollId,
       messageId,
     };
-
-    let pollEvent = new PollVoteEvent(pollId, message.id, pollVoteEventPayload);
-    if (!poll.votedPollOptionIds.includes(option.id)) {
+    let pollEvent = new PollVoteEvent(pollId, messageId, pollVoteEventPayload);
+    if (!poll.votedPollOptionIds.includes(pollOptionId)) {
       await currentChannel
         .votePoll(pollId, pollOptionIds, pollEvent)
-        .then((e) => {
+        .then(async (e) => {
           console.log("Vote Poll Event =", e);
-          poll.applyPollVoteEvent(e);
+          poll.applyPollVoteEvent(e); //updates the Poll's voted_option_id
+          let messageId = e.messageId;
+          let channelType = e._payload.channel_type;
+          pollData[messageId] = undefined;
+          const params = {
+            messageId: messageId,
+            channelType: channelType,
+            channelUrl: currentChannel.url,
+          };
+          const updatedMessage = await sb.message.getMessage(params);
+          setMessageUpdate(updatedMessage);
+
+          message._poll.options = updatedMessage._poll.options;
+          console.log("set in poll msg =", message._poll.options);
         });
     }
-
-    //Get the poll option & pass in show_partial_voter_list: true 
-   let channelType = 'group'
-    // const getPollOption= PollOption.get(currentChannel.url, channelType, pollId, option.id)
-    // console.log('updated poll option!=', getPollOption)
-
-    //partialVoters ; partial_voter_list
-    //showPartialVoterList  ;     show_partial_voter_list 
-    let pollParams = {
-      channelUrl: currentChannel.url,
-      channelType,
-      pollId,
-      partialVoters: true
-      //showPartialVoterList: true 
-    }
-    let newPollInfo = await sb.poll.get(pollParams)
-
-    console.log("POLL=", newPollInfo);
-    updateUserMessage(currentChannel, message.messageId)
-      .then((message) => {
-      // console.log("Message update=", message);
-      })
-      .catch((error) => {
-        console.log("Update Message Error=", error);
-      });
-    
-    //votedPollOptionIds -> you voted on this id
   }
-  
+
   return (
     <div className="voting-message">
       <Card>
@@ -227,20 +219,28 @@ export default function PollMessage(props) {
               )}
               {poll.options &&
                 poll.options.map(function (option) {
-                  var style = {};
-
-                  if (!poll.options.includes(option.id)) {
-                    style = { backgroundColor: "white", color: "#6210cc" };
-                  } else {
-                    style = { backgroundColor: "#6210cc", color: "white" };
-                  }
+                  style = { backgroundColor: "white", color: "#6210cc" };
+                  // if(pollData[message.messageId]){
+                  //   console.log('There is poll data')
+                  //   console.log(pollData[message.messageId][option.id])
+                  //   let currentUserVoted = pollData[message.messageId][option.id].voters =( (voter) => voter.userId === userId)
+                  //   console.log('CURRENT USER VOTED=', currentUserVoted)
+                  //   if (currentUserVoted) {
+                  //     console.log('The current user voted so set style')
+                  //     style = { backgroundColor: "#6210cc", color: "white" };
+                  //  }
+                  // }
 
                   return (
                     <div id="options-wrapper" key={option.id}>
-                      <p id="option-title">{option.text} <p id="option-vote-count">{option.voteCount}</p></p>
+                      <h4 id="option-title">
+                        {option.text}{" "}
+                        <p id="option-vote-count">{option.voteCount}</p>
+                      </h4>
                       <button
                         onClick={(e) => handleVote(e)}
                         id="vote-btn"
+                        className={option.id}
                         style={style}
                       >
                         {option.text}
