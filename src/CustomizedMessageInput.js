@@ -92,6 +92,7 @@ function CustomizedMessageInput({ appId, sb }) {
     const params = {
       title: formText,
       optionTexts: options,
+      allowUserSuggestion: true
     };
     const myPoll = await sb.poll.create(params);
     const userMessageParams = {};

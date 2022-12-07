@@ -9,7 +9,6 @@ import {
 import "./index.css";
 import CustomizedMessageItem from "./CustomizedMessageItem";
 import CustomizedMessageInput from "./CustomizedMessageInput";
-import GroupChannelHandler from "@sendbird/uikit-react/handlers/GroupChannelHandler";
 
 function CustomizedApp({ userId, appId, sb }) {
   const [showSettings, setShowSettings] = useState(false);
@@ -18,7 +17,7 @@ function CustomizedApp({ userId, appId, sb }) {
   const store = useSendbirdStateContext();
   const updateUserMessage = sendbirdSelectors.getUpdateUserMessage(store);
   var channelChatDiv = document.getElementsByClassName("channel-chat")[0];
-  const [updatedMessage, setUpdatedMessage] = useState(null);
+
   const renderSettingsBar = () => {
     channelChatDiv.style.width = "52%";
     channelChatDiv.style.cssFloat = "left";
@@ -28,56 +27,42 @@ function CustomizedApp({ userId, appId, sb }) {
     channelChatDiv.style.width = "76%";
     channelChatDiv.style.cssFloat = "right";
   };
-  const [pollData, setPollData] = useState([]);
+  // async function getVoters(
+  //   messageId,
+  //   pollId,
+  //   updatedVoteCounts,
+  // //  message
+  // ) {
+  //   let optionIds = updatedVoteCounts.map((option) => {
+  //     return option.option_id;
+  //   });
+  //   for (const optionId of optionIds) {
+  //     const query = currentChannel.createPollVoterListQuery(pollId, optionId);
+  //     const voters = await query.next();
+  //     pollData[messageId][optionId] = {
+  //       voters: voters,
+  //       vote_count: voters.length,
+  //     };
+  //   }
+  //   for (const [index, option] of pollData[messageId].message._poll.options.entries()) {
+  //   console.log('THE I =', index)
+  //     if(optionIds.includes(option.id)){
+  //       console.log('in if')
+  //       //options[i].votecount = polldata message id option id vote count
+  //         ///right = local; left = how its stored in msg
+  //       pollData[messageId].message._poll.options[index].voteCount = pollData[messageId][option.id].vote_count
+  //     }
+  //   }
+  //   //HOW TO CHANGE MESSAGE ON THE SCREEN -> force rerender of one of the messages in the list:
+  //       //HOW do we update state inside of the component (PollMessage)
+  //     //UIKit holds the state -> has msg list, if it changes then rerender: HOW TO FIND HOW TO RECIEVE THAT CHANGE
+   
+  //   //onpoll VOTED EVENT FOR EACH MESSAGE 
+  //   // if message.mesage id (localmsg) = poll event message id
+  //   //only if that matches then do stuff (that way if event comes in BUT only relevent one does the action)
 
-  async function getVoters(
-    // pollData,
-    messageId,
-    pollId,
-    updatedVoteCounts,
-    message
-  ) {
-    let optionIds = updatedVoteCounts.map((option) => {
-      return option.option_id;
-    });
-    pollData[messageId] = {
-      message: message,
-    };
-    for (const optionId of optionIds) {
-      const query = currentChannel.createPollVoterListQuery(pollId, optionId);
-      const voters = await query.next();
-        pollData[messageId][optionId] = {
-          voters: voters,
-          vote_count: voters.length,
-        };
-    }
-    console.log('Poll Data AFTER RESETTING TO NEW VOTE=', pollData);
-  }
-  let UNIQUE_HANDLER_ID = "1234";
-  const groupChannelHandler = new GroupChannelHandler();
-  sb.groupChannel.addGroupChannelHandler(
-    UNIQUE_HANDLER_ID,
-    groupChannelHandler
-  );
-
-  groupChannelHandler.onPollVoted = async (channel, event) => {
-   console.log("onPollVoted event=", event);
-    let messageId = event.messageId;
-    let pollId = event.pollId;
-    let updatedVoteCounts = event._payload.updated_vote_counts;
-    let channelType = event._payload.channel_type;
-   pollData[messageId] = undefined;
-    const params = {
-      messageId: messageId,
-      channelType: channelType,
-      channelUrl: currentChannelUrl,
-    };
-    const message = await sb.message.getMessage(params);
-    setUpdatedMessage(message)
-    if (pollData[messageId] === undefined) {
-      getVoters( messageId, pollId, updatedVoteCounts, message);
-    }
-  };
+  //   //if uikit has a better way to do that def do that 
+  // }
 
   return (
     <div className="channel-wrap">
@@ -102,9 +87,7 @@ function CustomizedApp({ userId, appId, sb }) {
               currentChannel={currentChannel}
               updateUserMessage={updateUserMessage}
               sb={sb}
-              pollData={pollData}
-              setPollData={setPollData}
-              updatedMessage={updatedMessage}
+             
             />
           )}
           renderMessageInput={() => (
