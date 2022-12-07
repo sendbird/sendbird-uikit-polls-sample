@@ -122,6 +122,7 @@ export default function PollMessage(props) {
 
   async function handleOptionsSubmit(e) {
     e.preventDefault();
+    console.log('option value added=', optionsValue)
     await currentChannel
       .addPollOption(poll.id, optionsValue)
       .then((poll) => {
@@ -130,20 +131,18 @@ export default function PollMessage(props) {
       .catch((error) => {
         console.log("error=", error);
       });
-    // updateUserMessage(currentChannel, message.messageId)
-    //   .then((message) => {
-    //     console.log("Message update=", message);
-    //   })
-    //   .catch((error) => {
-    //     console.log("error=", error);
-    //   });
+    updateUserMessage(currentChannel, message.messageId)
+      .then((message) => {
+        console.log("Message update=", message);
+      })
+      .catch((error) => {
+        console.log("error=", error);
+      });
     setShowOptionsForm(false);
     setOptionsValue("");
   }
 
-  //this function doesnt trigger any actions, JUST GETS VOTERS
   async function getVoters(pollId, updatedVoteCounts) {
-    console.log("in get voters");
     let optionIds = updatedVoteCounts.map((option) => {
       return option.option_id;
     });
@@ -165,14 +164,9 @@ export default function PollMessage(props) {
     // .catch((error) => {
     //   console.log("error=", error);
     // });
-    //setPollData(pollData);
     console.log("Poll Data AFTER getVoters=", pollData);
     console.log("msg options after getVoters=", message._poll.options);
   }
-
-  //1. im being called w/ a message to draw it on the screen (dont have to change anything, just hve to download list of voters 1x) ->this is not just on the initial voting
-  //2. someone voted & they told me ab it: I have updated vote count for 2 options & need to find those options, change the vote count & trigger rerender
-  //here im triggering change in message to rerender it but rerenders get called in the 1st flow , so why do i want to trigger rerender?
 
   async function handleVote(e) {
     e.preventDefault();
@@ -202,29 +196,27 @@ export default function PollMessage(props) {
         .votePoll(pollId, pollOptionIds, pollEvent)
         .then(async (e) => {
           console.log("1.Vote Poll Event =", e);
-          poll.applyPollVoteEvent(e); //updates the Poll's voted_option_id
+          poll.applyPollVoteEvent(e);
           let updatedVoteCounts = e._payload.updated_vote_counts;
           console.log(
             "2.updated vote counts from vote event=",
             updatedVoteCounts
           );
-          //if (pollData.length === 0) {
-            setPollData([])
-            let optionIds = updatedVoteCounts.map((option) => {
-              return option.option_id;
-            });
-            for (const optionId of optionIds) {
-              const query = currentChannel.createPollVoterListQuery(
-                pollId,
-                optionId
-              );
-              const voters = await query.next();
-              pollData[optionId] = {
-                voters: voters,
-                vote_count: voters.length,
-              };
-            }
-          //}
+          setPollData([]);
+          let optionIds = updatedVoteCounts.map((option) => {
+            return option.option_id;
+          });
+          for (const optionId of optionIds) {
+            const query = currentChannel.createPollVoterListQuery(
+              pollId,
+              optionId
+            );
+            const voters = await query.next();
+            pollData[optionId] = {
+              voters: voters,
+              vote_count: voters.length,
+            };
+          }
           console.log(
             "3.pollData after setting pollData w/ updatedVoteCounts=",
             pollData

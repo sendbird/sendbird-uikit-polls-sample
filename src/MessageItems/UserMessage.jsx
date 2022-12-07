@@ -57,12 +57,12 @@ export default function UserMessage(props) {
     const params = {
       title: messageText,
       optionTexts: options,
+      allowUserSuggestion: true,
     };
     const poll = await sb.poll.create(params);
     const userMessageParams = {};
     userMessageParams.message = messageText;
     userMessageParams.pollId = poll.id;
-    userMessageParams.allowUserSuggestion = true
     updateUserMessage(currentChannel, message.messageId, userMessageParams)
       .then((message) => {
         console.log("message=", message);

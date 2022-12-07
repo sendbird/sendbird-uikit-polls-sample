@@ -79,20 +79,20 @@ function CustomizedMessageInput({ appId, sb }) {
 
   async function submitPoll(event) {
     event.preventDefault();
-    let options = []
-    if(optionTextA !== ""){
-      options.push(optionTextA)
-    } 
-    if(optionTextB !== ""){
-      options.push(optionTextB)
+    let options = [];
+    if (optionTextA !== "") {
+      options.push(optionTextA);
     }
-    if( optionTextC !== ""){
-      options.push(optionTextC)
+    if (optionTextB !== "") {
+      options.push(optionTextB);
+    }
+    if (optionTextC !== "") {
+      options.push(optionTextC);
     }
     const params = {
       title: formText,
       optionTexts: options,
-      allowUserSuggestion: true
+      allowUserSuggestion: true,
     };
     const myPoll = await sb.poll.create(params);
     const userMessageParams = {};
