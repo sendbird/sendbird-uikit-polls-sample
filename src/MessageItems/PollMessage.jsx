@@ -11,7 +11,6 @@ import UpdatePollForm from "./UpdatePollForm";
 import DeleteOptionForm from "./DeleteOptionForm";
 import { PollVoteEvent } from "@sendbird/chat/poll";
 import GroupChannelHandler from "@sendbird/uikit-react/handlers/GroupChannelHandler";
-import { SettingsInputAntennaTwoTone } from "@mui/icons-material";
 
 export default function PollMessage(props) {
   const { message, userId, updateUserMessage, currentChannel, sb } = props;
@@ -24,9 +23,6 @@ export default function PollMessage(props) {
   const [pollData, setPollData] = useState([]);
   let style = {};
   let poll = message._poll;
-
-  //WHEN ADDING SHOW WHO VOTED, only show up to 5 people who voted under each option
-  //if over 5, show the 5 ppl then ',..'
 
   //want to download voters who voted for each option in THIS msg
   if (pollData.length === 0) {
@@ -122,7 +118,7 @@ export default function PollMessage(props) {
 
   async function handleOptionsSubmit(e) {
     e.preventDefault();
-    console.log('option value added=', optionsValue)
+    console.log("option value added=", optionsValue);
     await currentChannel
       .addPollOption(poll.id, optionsValue)
       .then((poll) => {
@@ -146,26 +142,32 @@ export default function PollMessage(props) {
     let optionIds = updatedVoteCounts.map((option) => {
       return option.option_id;
     });
-    if (pollData.length === 0) {
+    console.log("B: in getVoters, optionIds=", optionIds);
+    console.log("C: pollData is=", pollData);
       for (const optionId of optionIds) {
-        const query = currentChannel.createPollVoterListQuery(pollId, optionId);
-        const voters = await query.next();
-        pollData[optionId] = {
-          voters: voters,
-          vote_count: voters.length,
-        };
+        console.log("D: option from optionIds= ", optionId);
+        if (pollData[optionId]) {
+          console.log("E: poll has option");
+          const query = currentChannel.createPollVoterListQuery(pollId, optionId);
+          const voters = await query.next();
+          pollData[optionId] = {
+            voters: voters,
+            vote_count: voters.length,
+          };
+        }
       }
-    }
-    // updateUserMessage(currentChannel, message.messageId)
-    // .then((message) => {
-    //   console.log("Message update=", message);
-
-    // })
-    // .catch((error) => {
-    //   console.log("error=", error);
-    // });
-    console.log("Poll Data AFTER getVoters=", pollData);
-    console.log("msg options after getVoters=", message._poll.options);
+    //pollData correctly updates the 2 options where votes changed
+    console.log("F:pollData after updating voteCounts=", pollData);
+    //has to update the message with the changes to reflect on UI for other users
+    updateUserMessage(currentChannel, message.messageId)
+    .then((message) => {
+      console.log("Message update=", message);
+    })
+    .catch((error) => {
+      console.log("error=", error);
+    });
+    //console.log("Poll Data AFTER getVoters=", pollData);
+    console.log("G:msg options after getVoters=", message._poll.options);
   }
 
   async function handleVote(e) {
@@ -198,10 +200,6 @@ export default function PollMessage(props) {
           console.log("1.Vote Poll Event =", e);
           poll.applyPollVoteEvent(e);
           let updatedVoteCounts = e._payload.updated_vote_counts;
-          console.log(
-            "2.updated vote counts from vote event=",
-            updatedVoteCounts
-          );
           setPollData([]);
           let optionIds = updatedVoteCounts.map((option) => {
             return option.option_id;
@@ -217,10 +215,6 @@ export default function PollMessage(props) {
               vote_count: voters.length,
             };
           }
-          console.log(
-            "3.pollData after setting pollData w/ updatedVoteCounts=",
-            pollData
-          );
         });
     }
   }
@@ -233,11 +227,9 @@ export default function PollMessage(props) {
   );
 
   groupChannelHandler.onPollVoted = async (channel, event) => {
-    console.log("onPollVoted event=", event);
+    console.log("A: onPollVoted event=", event);
     let pollId = event.pollId;
     let updatedVoteCounts = event._payload.updated_vote_counts;
-    //do i need this -> if i do this does it cause redownload of query list
-    setPollData([]);
     getVoters(pollId, updatedVoteCounts);
   };
 

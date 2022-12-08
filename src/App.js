@@ -4,7 +4,7 @@ import SendBirdProvider from "@sendbird/uikit-react/SendbirdProvider";
 import "@sendbird/uikit-react/dist/index.css";
 import CustomizedApp from "./CustomizedApp.js";
 import SendbirdChat from "@sendbird/chat";
-import { PollModule } from "@sendbird/chat/poll";
+// import { PollModule } from "@sendbird/chat/poll";
 import { GroupChannelModule } from "@sendbird/chat/groupChannel";
 
 export default function App() {
@@ -15,7 +15,9 @@ export default function App() {
 
   const sb = SendbirdChat.init({
     appId: APP_ID,
-    modules: [new GroupChannelModule(), new PollModule()],
+    modules: [new GroupChannelModule()
+      //, new PollModule()
+    ],
   });
   sb.connect(USER_ID, ACCESS_TOKEN);
 

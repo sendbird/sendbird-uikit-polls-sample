@@ -27,43 +27,7 @@ function CustomizedApp({ userId, appId, sb }) {
     channelChatDiv.style.width = "76%";
     channelChatDiv.style.cssFloat = "right";
   };
-  // async function getVoters(
-  //   messageId,
-  //   pollId,
-  //   updatedVoteCounts,
-  // //  message
-  // ) {
-  //   let optionIds = updatedVoteCounts.map((option) => {
-  //     return option.option_id;
-  //   });
-  //   for (const optionId of optionIds) {
-  //     const query = currentChannel.createPollVoterListQuery(pollId, optionId);
-  //     const voters = await query.next();
-  //     pollData[messageId][optionId] = {
-  //       voters: voters,
-  //       vote_count: voters.length,
-  //     };
-  //   }
-  //   for (const [index, option] of pollData[messageId].message._poll.options.entries()) {
-  //   console.log('THE I =', index)
-  //     if(optionIds.includes(option.id)){
-  //       console.log('in if')
-  //       //options[i].votecount = polldata message id option id vote count
-  //         ///right = local; left = how its stored in msg
-  //       pollData[messageId].message._poll.options[index].voteCount = pollData[messageId][option.id].vote_count
-  //     }
-  //   }
-  //   //HOW TO CHANGE MESSAGE ON THE SCREEN -> force rerender of one of the messages in the list:
-  //       //HOW do we update state inside of the component (PollMessage)
-  //     //UIKit holds the state -> has msg list, if it changes then rerender: HOW TO FIND HOW TO RECIEVE THAT CHANGE
-   
-  //   //onpoll VOTED EVENT FOR EACH MESSAGE 
-  //   // if message.mesage id (localmsg) = poll event message id
-  //   //only if that matches then do stuff (that way if event comes in BUT only relevent one does the action)
-
-  //   //if uikit has a better way to do that def do that 
-  // }
-
+ 
   return (
     <div className="channel-wrap">
       <div className="channel-list">
