@@ -13,7 +13,7 @@ import useSendbirdStateContext from "@sendbird/uikit-react/useSendbirdStateConte
 import sendbirdSelectors from "@sendbird/uikit-react/sendbirdSelectors";
 import { useChannelContext } from "@sendbird/uikit-react/Channel/context";
 
-function CustomizedMessageInput({ appId, sb }) {
+function CustomizedMessageInput({ sb }) {
   const store = useSendbirdStateContext();
   const sendUserMessage = sendbirdSelectors.getSendUserMessage(store);
   const sendFileMessage = sendbirdSelectors.getSendFileMessage(store);

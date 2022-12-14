@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo } from "react";
 import AdminMessage from "./MessageItems/AdminMessage";
 import FileMessage from "./MessageItems/FileMessage";
 import UserMessage from "./MessageItems/UserMessage";
@@ -28,7 +28,6 @@ export default function CustomizedMessageItem(props) {
           updateUserMessage={updateUserMessage}
           currentChannel={currentChannel}
           sb={sb}
-      
         />
       );
     } else if (message.isUserMessage && message.isUserMessage()) {

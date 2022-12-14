@@ -46,7 +46,8 @@ export default function PollMessage(props) {
     getOptions();
     //  console.log('2.pollData after getOptions() =', pollData)
   }
-  console.log(`IM BEING RENDERED; mssgId = ${message.messageId}`, pollData);
+  // console.log(`IM BEING RENDERED; mssgId = ${message.messageId}`, pollData);
+  console.log('poll=', poll)
 
   const openDropdown = () => {
     if (poll.createdBy === userId) {
@@ -83,15 +84,9 @@ export default function PollMessage(props) {
     }
     results.map(async (optionId) => {
       let optionIdInteger = parseInt(optionId);
+      console.log('option to delete=', optionIdInteger)
       await currentChannel.deletePollOption(poll.id, optionIdInteger);
     });
-    updateUserMessage(currentChannel, message.messageId)
-      .then((message) => {
-        console.log("Message update=", message);
-      })
-      .catch((error) => {
-        console.log("error=", error);
-      });
     setShowDeleteOptionsForm(false);
   }
 
@@ -101,16 +96,13 @@ export default function PollMessage(props) {
       title: messageText,
       allowUserSuggestion: true,
     };
-    await currentChannel.updatePoll(poll.id, updateParams);
-    const userMessageParams = {};
-    userMessageParams.message = messageText;
-    updateUserMessage(currentChannel, message.messageId, userMessageParams)
-      .then((message) => {
-        console.log("Message update=", message);
-      })
-      .catch((error) => {
-        console.log("error=", error);
-      });
+    await currentChannel.updatePoll(poll.id, updateParams)
+    .then((poll) => {
+      console.log("Poll updated=", poll);
+    })
+    .catch((error) => {
+      console.log("error=", error);
+    });
     setDropdownOptions(!dropdownOptions);
     changeMessageText("");
     setShowForm(false);
@@ -118,18 +110,10 @@ export default function PollMessage(props) {
 
   async function handleOptionsSubmit(e) {
     e.preventDefault();
-    console.log("option value added=", optionsValue);
     await currentChannel
       .addPollOption(poll.id, optionsValue)
       .then((poll) => {
         console.log("Poll option added=", poll);
-      })
-      .catch((error) => {
-        console.log("error=", error);
-      });
-    updateUserMessage(currentChannel, message.messageId)
-      .then((message) => {
-        console.log("Message update=", message);
       })
       .catch((error) => {
         console.log("error=", error);
@@ -144,28 +128,28 @@ export default function PollMessage(props) {
     });
     console.log("B: in getVoters, optionIds=", optionIds);
     console.log("C: pollData is=", pollData);
-      for (const optionId of optionIds) {
-        console.log("D: option from optionIds= ", optionId);
-        if (pollData[optionId]) {
-          console.log("E: poll has option");
-          const query = currentChannel.createPollVoterListQuery(pollId, optionId);
-          const voters = await query.next();
-          pollData[optionId] = {
-            voters: voters,
-            vote_count: voters.length,
-          };
-        }
+    for (const optionId of optionIds) {
+      console.log("D: option from optionIds= ", optionId);
+      if (pollData[optionId]) {
+        console.log("E: poll has option");
+        const query = currentChannel.createPollVoterListQuery(pollId, optionId);
+        const voters = await query.next();
+        pollData[optionId] = {
+          voters: voters,
+          vote_count: voters.length,
+        };
       }
+    }
     //pollData correctly updates the 2 options where votes changed
     console.log("F:pollData after updating voteCounts=", pollData);
     //has to update the message with the changes to reflect on UI for other users
-    updateUserMessage(currentChannel, message.messageId)
-    .then((message) => {
-      console.log("Message update=", message);
-    })
-    .catch((error) => {
-      console.log("error=", error);
-    });
+    // updateUserMessage(currentChannel, message.messageId)
+    //   .then((message) => {
+    //     console.log("Message update=", message);
+    //   })
+    //   .catch((error) => {
+    //     console.log("error=", error);
+    //   });
     //console.log("Poll Data AFTER getVoters=", pollData);
     console.log("G:msg options after getVoters=", message._poll.options);
   }
@@ -233,6 +217,15 @@ export default function PollMessage(props) {
     getVoters(pollId, updatedVoteCounts);
   };
 
+  groupChannelHandler.onPollUpdated = async(channel, event)=> {
+    console.log('onPollUpdated event=', event)
+    console.log('POLLLLL=',poll)
+    //update rendered message by applying poll update event:
+    poll.applyPollUpdateEvent(event); //works when adding option BUT does not work when deleting option OR updatePoll (UI does not change for deleting)
+  }
+  
+  //onPollDelete
+ 
   return (
     <div className="voting-message">
       <Card>
@@ -253,7 +246,7 @@ export default function PollMessage(props) {
         <CardContent>
           {
             <Typography variant="body2" component="div">
-              {message.message}
+              {message._poll.title}
               {!showOptionsForm && (
                 <div>
                   <button onClick={toggleOptionsForm} id="add-options-btn">

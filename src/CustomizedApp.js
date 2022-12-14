@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   ChannelList,
   Channel,
@@ -10,7 +10,7 @@ import "./index.css";
 import CustomizedMessageItem from "./CustomizedMessageItem";
 import CustomizedMessageInput from "./CustomizedMessageInput";
 
-function CustomizedApp({ userId, appId, sb }) {
+function CustomizedApp({ userId, sb }) {
   const [showSettings, setShowSettings] = useState(false);
   const [currentChannel, setCurrentChannel] = useState(null);
   const currentChannelUrl = currentChannel ? currentChannel.url : "";
@@ -51,11 +51,10 @@ function CustomizedApp({ userId, appId, sb }) {
               currentChannel={currentChannel}
               updateUserMessage={updateUserMessage}
               sb={sb}
-             
             />
           )}
           renderMessageInput={() => (
-            <CustomizedMessageInput appId={appId} sb={sb} />
+            <CustomizedMessageInput sb={sb} />
           )}
         />
       </div>

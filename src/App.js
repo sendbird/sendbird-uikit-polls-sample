@@ -29,7 +29,7 @@ export default function App() {
         nickname={NICKNAME}
         accessToken={ACCESS_TOKEN}
       >
-        <CustomizedApp userId={USER_ID} appId={APP_ID} sb={sb} />
+        <CustomizedApp userId={USER_ID} sb={sb} />
       </SendBirdProvider>
     </div>
   );
