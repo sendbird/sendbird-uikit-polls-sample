@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Card,
   CardHeader,
@@ -20,34 +20,30 @@ export default function PollMessage(props) {
   const [showOptionsForm, setShowOptionsForm] = useState(false);
   const [showDeleteOptionsForm, setShowDeleteOptionsForm] = useState(false);
   const [optionsValue, setOptionsValue] = useState("");
-  const [pollData, setPollData] = useState([]);
+  const [myVote, setMyVote]= useState(0);
   let style = {};
   let poll = message._poll;
 
-  //want to download voters who voted for each option in THIS msg
-  if (pollData.length === 0) {
-    // console.log('initial poll data is 0')
-    async function getOptions() {
-      // console.log('polls options',message._poll.options)
-      for (const option of message._poll.options) {
-        let optionId = option.id;
-        const query = currentChannel.createPollVoterListQuery(
-          message._poll.id,
-          optionId
-        );
-        const voters = await query.next();
-        pollData[optionId] = {
-          voters: voters,
-          vote_count: voters.length,
-        };
+  useEffect(() => {
+    console.log("will get voters");
+      async function getOptions() {
+        for (const option of message._poll.options) {
+          let optionId = option.id;
+          const query = currentChannel.createPollVoterListQuery(
+            message._poll.id,
+            optionId
+          );
+          const voters = await query.next();
+          console.log("voters=", voters);
+          for (const voter of voters) {
+            if(voter.userId === userId){
+              setMyVote(optionId)
+            }
+          }
+        }
       }
-      // console.log('1.pollData after looping thru options =', pollData)
-    }
-    getOptions();
-    //  console.log('2.pollData after getOptions() =', pollData)
-  }
-  // console.log(`IM BEING RENDERED; mssgId = ${message.messageId}`, pollData);
-  console.log('poll=', poll)
+      getOptions()
+  },[]);
 
   const openDropdown = () => {
     if (poll.createdBy === userId) {
@@ -84,7 +80,7 @@ export default function PollMessage(props) {
     }
     results.map(async (optionId) => {
       let optionIdInteger = parseInt(optionId);
-      console.log('option to delete=', optionIdInteger)
+      console.log("option to delete=", optionIdInteger);
       await currentChannel.deletePollOption(poll.id, optionIdInteger);
     });
     setShowDeleteOptionsForm(false);
@@ -96,13 +92,14 @@ export default function PollMessage(props) {
       title: messageText,
       allowUserSuggestion: true,
     };
-    await currentChannel.updatePoll(poll.id, updateParams)
-    .then((poll) => {
-      console.log("Poll updated=", poll);
-    })
-    .catch((error) => {
-      console.log("error=", error);
-    });
+    await currentChannel
+      .updatePoll(poll.id, updateParams)
+      .then((poll) => {
+        console.log("Poll updated=", poll);
+      })
+      .catch((error) => {
+        console.log("error=", error);
+      });
     setDropdownOptions(!dropdownOptions);
     changeMessageText("");
     setShowForm(false);
@@ -120,38 +117,6 @@ export default function PollMessage(props) {
       });
     setShowOptionsForm(false);
     setOptionsValue("");
-  }
-
-  async function getVoters(pollId, updatedVoteCounts) {
-    let optionIds = updatedVoteCounts.map((option) => {
-      return option.option_id;
-    });
-    console.log("B: in getVoters, optionIds=", optionIds);
-    console.log("C: pollData is=", pollData);
-    for (const optionId of optionIds) {
-      console.log("D: option from optionIds= ", optionId);
-      if (pollData[optionId]) {
-        console.log("E: poll has option");
-        const query = currentChannel.createPollVoterListQuery(pollId, optionId);
-        const voters = await query.next();
-        pollData[optionId] = {
-          voters: voters,
-          vote_count: voters.length,
-        };
-      }
-    }
-    //pollData correctly updates the 2 options where votes changed
-    console.log("F:pollData after updating voteCounts=", pollData);
-    //has to update the message with the changes to reflect on UI for other users
-    // updateUserMessage(currentChannel, message.messageId)
-    //   .then((message) => {
-    //     console.log("Message update=", message);
-    //   })
-    //   .catch((error) => {
-    //     console.log("error=", error);
-    //   });
-    //console.log("Poll Data AFTER getVoters=", pollData);
-    console.log("G:msg options after getVoters=", message._poll.options);
   }
 
   async function handleVote(e) {
@@ -183,22 +148,24 @@ export default function PollMessage(props) {
         .then(async (e) => {
           console.log("1.Vote Poll Event =", e);
           poll.applyPollVoteEvent(e);
-          let updatedVoteCounts = e._payload.updated_vote_counts;
-          setPollData([]);
-          let optionIds = updatedVoteCounts.map((option) => {
-            return option.option_id;
-          });
-          for (const optionId of optionIds) {
-            const query = currentChannel.createPollVoterListQuery(
-              pollId,
-              optionId
-            );
-            const voters = await query.next();
-            pollData[optionId] = {
-              voters: voters,
-              vote_count: voters.length,
-            };
+          async function getOptions() {
+            for (const option of message._poll.options) {
+              let optionId = option.id;
+              const query = currentChannel.createPollVoterListQuery(
+                message._poll.id,
+                optionId
+              );
+              const voters = await query.next();
+              console.log("voters=", voters);
+              for (const voter of voters) {
+                if(voter.userId === userId){
+                  setMyVote(optionId)
+                }
+              }
+            }
           }
+          getOptions()
+
         });
     }
   }
@@ -211,21 +178,16 @@ export default function PollMessage(props) {
   );
 
   groupChannelHandler.onPollVoted = async (channel, event) => {
-    console.log("A: onPollVoted event=", event);
-    let pollId = event.pollId;
-    let updatedVoteCounts = event._payload.updated_vote_counts;
-    getVoters(pollId, updatedVoteCounts);
+    console.log("onPollVoted event=", event);
+    //reflect in UI that a poll was voted on
   };
 
-  groupChannelHandler.onPollUpdated = async(channel, event)=> {
-    console.log('onPollUpdated event=', event)
-    console.log('POLLLLL=',poll)
-    //update rendered message by applying poll update event:
+  groupChannelHandler.onPollUpdated = async (channel, event) => {
+    console.log("onPollUpdated event=", event);
     poll.applyPollUpdateEvent(event); //works when adding option BUT does not work when deleting option OR updatePoll (UI does not change for deleting)
-  }
-  
-  //onPollDelete
- 
+    console.log("Poll after applyPollUpdateEvent=", poll);
+  };
+
   return (
     <div className="voting-message">
       <Card>
@@ -286,29 +248,32 @@ export default function PollMessage(props) {
                 message._poll.options.map(function (option) {
                   style = { backgroundColor: "white", color: "#6210cc" };
 
-                  if (
-                    pollData[option.id] &&
-                    pollData[option.id].voters.length !== 0
-                  ) {
-                    console.log(
-                      "option has voters",
-                      pollData[option.id].voters
-                    );
-                    let voters = pollData[option.id].voters;
-                    console.log("option has voters, which are=", voters);
-                    let currentUserVoted = voters.some(
-                      (voter) => voter.userId === userId
-                    );
-                    console.log("Did current user vote=", currentUserVoted);
-                    if (currentUserVoted) {
-                      style = { backgroundColor: "#6210cc", color: "white" };
-                    }
+                  // if (
+                  //   pollData[option.id] &&
+                  //   pollData[option.id].voters.length !== 0
+                  // ) {
+                  //   console.log(
+                  //     "option has voters",
+                  //     pollData[option.id].voters
+                  //   );
+                  //   let voters = pollData[option.id].voters;
+                  //   console.log("option has voters, which are=", voters);
+                  //   let currentUserVoted = voters.some(
+                  //     (voter) => voter.userId === userId
+                  //   );
+                  //   console.log("Did current user vote=", currentUserVoted);
+                  //   if (currentUserVoted) {
+                  //     style = { backgroundColor: "#6210cc", color: "white" };
+                  //   }
+                  // }
+                  if(option.id === myVote){
+                    style = { backgroundColor: "#6210cc", color: "white" };
                   }
 
                   return (
                     <div id="options-wrapper" key={option.id}>
                       <h4 id="option-title">
-                        {option.text}{" "}
+                       I have voted {myVote}{option.text}{" "}
                         <p id="option-vote-count">{option.voteCount}</p>
                       </h4>
                       <button
