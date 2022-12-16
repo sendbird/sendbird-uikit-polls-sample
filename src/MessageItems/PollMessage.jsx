@@ -11,10 +11,14 @@ import UpdatePollForm from "./UpdatePollForm";
 import DeleteOptionForm from "./DeleteOptionForm";
 import { PollVoteEvent } from "@sendbird/chat/poll";
 import GroupChannelHandler from "@sendbird/uikit-react/handlers/GroupChannelHandler";
+import { useChannelContext } from "@sendbird/uikit-react/Channel/context";
 
 export default function PollMessage(props) {
-  const { message, userId, updateUserMessage, currentChannel, sb } = props;
-  const [messageText, changeMessageText] = useState(message.message);
+  const { message, userId, currentChannel, sb } = props;
+  let poll = message._poll;
+  const channelStore = useChannelContext();
+  const messagesDispatcher = channelStore?.messagesDispatcher;
+  const [messageText, setMessageText] = useState(poll.title);
   const [dropdownOptions, setDropdownOptions] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [showOptionsForm, setShowOptionsForm] = useState(false);
@@ -22,10 +26,8 @@ export default function PollMessage(props) {
   const [optionsValue, setOptionsValue] = useState("");
   const [myVote, setMyVote] = useState(0);
   let style = {};
-  let poll = message._poll;
 
   useEffect(() => {
-    //console.log("will get voters");
     async function getOptions() {
       for (const option of message._poll.options) {
         let optionId = option.id;
@@ -34,7 +36,6 @@ export default function PollMessage(props) {
           optionId
         );
         const voters = await query.next();
-       // console.log("voters=", voters);
         for (const voter of voters) {
           if (voter.userId === userId) {
             setMyVote(optionId);
@@ -78,15 +79,6 @@ export default function PollMessage(props) {
         results.push(checkboxes[i].id);
       }
     }
-    const userMessageParams = {};
-    // userMessageParams.message = messageText;
-    updateUserMessage(currentChannel, message.messageId, userMessageParams)
-      .then((message) => {
-        console.log("Message update=", message);
-      })
-      .catch((error) => {
-        console.log("error=", error);
-      });
     results.map(async (optionId) => {
       let optionIdInteger = parseInt(optionId);
       console.log("option to delete=", optionIdInteger);
@@ -102,31 +94,13 @@ export default function PollMessage(props) {
       allowUserSuggestion: true,
     };
     await currentChannel.updatePoll(poll.id, updateParams);
-    const userMessageParams = {};
-    userMessageParams.message = messageText;
-    updateUserMessage(currentChannel, message.messageId, userMessageParams)
-      .then((message) => {
-        console.log("Message update, update poll title=", message);
-      })
-      .catch((error) => {
-        console.log("error=", error);
-      });
     setDropdownOptions(!dropdownOptions);
-    changeMessageText("");
     setShowForm(false);
   }
 
   async function handleOptionsSubmit(e) {
     e.preventDefault();
     await currentChannel.addPollOption(poll.id, optionsValue);
-    const userMessageParams = {};
-    updateUserMessage(currentChannel, message.messageId, userMessageParams)
-      .then((message) => {
-        console.log("Message update, adding option=", message);
-      })
-      .catch((error) => {
-        console.log("error=", error);
-      });
     setShowOptionsForm(false);
     setOptionsValue("");
   }
@@ -175,18 +149,6 @@ export default function PollMessage(props) {
             }
           }
           getOptions();
-          const userMessageParams = {};
-          updateUserMessage(
-            currentChannel,
-            message.messageId,
-            userMessageParams
-          )
-            .then((message) => {
-              console.log("Message update=", message);
-            })
-            .catch((error) => {
-              console.log("error=", error);
-            });
         });
     }
   }
@@ -199,15 +161,21 @@ export default function PollMessage(props) {
   );
 
   groupChannelHandler.onPollVoted = async (channel, event) => {
-    console.log("onPollVoted event=", event);
-    //poll.applyPollVoteEvent(event);
-    //reflect in UI that a poll was voted on
+   // console.log("onPollVoted event=", event);
+    poll.applyPollVoteEvent(event);
+    messagesDispatcher({
+      type: "ON_MESSAGE_UPDATED",
+      payload: { channel, message },
+    });
   };
 
   groupChannelHandler.onPollUpdated = async (channel, event) => {
-    console.log("onPollUpdated event=", event);
-    poll.applyPollUpdateEvent(event); //works when adding option BUT does not work when deleting option OR updatePoll (UI does not change for deleting)
-  //  console.log("Poll after applyPollUpdateEvent=", poll);
+   // console.log("onPollUpdated event=", event);
+    poll.applyPollUpdateEvent(event);
+    messagesDispatcher({
+      type: "ON_MESSAGE_UPDATED",
+      payload: { channel, message },
+    });
   };
 
   return (
@@ -294,8 +262,8 @@ export default function PollMessage(props) {
           {showForm && (
             <UpdatePollForm
               messageText={messageText}
-              changeMessageText={changeMessageText}
-              submitPoll={updatePoll}
+              setMessageText={setMessageText}
+              updatePoll={updatePoll}
               setShowForm={setShowForm}
             />
           )}
