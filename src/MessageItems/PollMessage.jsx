@@ -128,7 +128,6 @@ export default function PollMessage(props) {
       messageId,
     };
     let pollEvent = new PollVoteEvent(pollId, messageId, pollVoteEventPayload);
-    if (!poll.votedPollOptionIds.includes(pollOptionId)) {
       await currentChannel
         .votePoll(pollId, pollOptionIds, pollEvent)
         .then(async (e) => {
@@ -150,7 +149,6 @@ export default function PollMessage(props) {
           }
           getOptions();
         });
-    }
   }
 
   let UNIQUE_HANDLER_ID = `${message.messageId}`;
