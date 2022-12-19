@@ -28,7 +28,7 @@ export default function PollMessage(props) {
   let style = {};
 
   useEffect(() => {
-    async function getOptions() {
+    async function getOptionsVoters() {
       for (const option of message._poll.options) {
         let optionId = option.id;
         const query = currentChannel.createPollVoterListQuery(
@@ -43,7 +43,7 @@ export default function PollMessage(props) {
         }
       }
     }
-    getOptions();
+    getOptionsVoters();
   }, []);
 
   const openDropdown = () => {
@@ -81,7 +81,6 @@ export default function PollMessage(props) {
     }
     results.map(async (optionId) => {
       let optionIdInteger = parseInt(optionId);
-      console.log("option to delete=", optionIdInteger);
       await currentChannel.deletePollOption(poll.id, optionIdInteger);
     });
     setShowDeleteOptionsForm(false);
@@ -128,27 +127,27 @@ export default function PollMessage(props) {
       messageId,
     };
     let pollEvent = new PollVoteEvent(pollId, messageId, pollVoteEventPayload);
-      await currentChannel
-        .votePoll(pollId, pollOptionIds, pollEvent)
-        .then(async (e) => {
-          poll.applyPollVoteEvent(e);
-          async function getOptions() {
-            for (const option of message._poll.options) {
-              let optionId = option.id;
-              const query = currentChannel.createPollVoterListQuery(
-                message._poll.id,
-                optionId
-              );
-              const voters = await query.next();
-              for (const voter of voters) {
-                if (voter.userId === userId) {
-                  setMyVote(optionId);
-                }
+    await currentChannel
+      .votePoll(pollId, pollOptionIds, pollEvent)
+      .then(async (e) => {
+        poll.applyPollVoteEvent(e);
+        async function getOptionsVoters() {
+          for (const option of message._poll.options) {
+            let optionId = option.id;
+            const query = currentChannel.createPollVoterListQuery(
+              message._poll.id,
+              optionId
+            );
+            const voters = await query.next();
+            for (const voter of voters) {
+              if (voter.userId === userId) {
+                setMyVote(optionId);
               }
             }
           }
-          getOptions();
-        });
+        }
+        getOptionsVoters();
+      });
   }
 
   let UNIQUE_HANDLER_ID = `${message.messageId}`;
@@ -159,7 +158,6 @@ export default function PollMessage(props) {
   );
 
   groupChannelHandler.onPollVoted = async (channel, event) => {
-   // console.log("onPollVoted event=", event);
     poll.applyPollVoteEvent(event);
     messagesDispatcher({
       type: "ON_MESSAGE_UPDATED",
@@ -168,7 +166,6 @@ export default function PollMessage(props) {
   };
 
   groupChannelHandler.onPollUpdated = async (channel, event) => {
-   // console.log("onPollUpdated event=", event);
     poll.applyPollUpdateEvent(event);
     messagesDispatcher({
       type: "ON_MESSAGE_UPDATED",

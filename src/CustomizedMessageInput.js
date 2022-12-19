@@ -25,7 +25,6 @@ function CustomizedMessageInput({ sb }) {
   const [optionTextA, setOptionTextA] = useState("");
   const [optionTextB, setOptionTextB] = useState("");
   const [optionTextC, setOptionTextC] = useState("");
-
   const [showTaskForm, setShowTaskForm] = useState("");
   const isInputEmpty = inputText.length < 1;
 
@@ -45,10 +44,8 @@ function CustomizedMessageInput({ sb }) {
         alert("Image size greater than 1 MB");
         return;
       }
-
       const params = {};
       params.file = event.target.files[0];
-
       sendFileMessage(channel, params)
         .onSucceeded((message) => {
           console.log(message);
@@ -68,7 +65,6 @@ function CustomizedMessageInput({ sb }) {
       params.message = inputText;
       sendUserMessage(channel, params)
         .onSucceeded((message) => {
-          // console.log(message);
           setInputText("");
         })
         .onFailed((error) => {
@@ -125,8 +121,6 @@ function CustomizedMessageInput({ sb }) {
           onClose={() => {
             setShowTaskForm(false);
           }}
-          // optionText={optionText}
-          // setOptionText={setOptionText}
           setOptionTextA={setOptionTextA}
           setOptionTextB={setOptionTextB}
           setOptionTextC={setOptionTextC}

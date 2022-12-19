@@ -25,7 +25,6 @@ export default function CustomizedMessageItem(props) {
         <PollMessage
           message={message}
           userId={userId}
-          updateUserMessage={updateUserMessage}
           currentChannel={currentChannel}
           sb={sb}
         />
