@@ -1,0 +1,12 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: sendbird-uikit-polls-sample
+description: This project was bootstrapped with Create React App.
+  annotations:
+    github.com/project-slug: sendbird/sendbird-uikit-polls-sample
+spec:
+  type: library
+  lifecycle: production
+  owner: dep-developer-experience
+  system: sendbird-uikit
