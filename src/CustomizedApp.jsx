@@ -5,7 +5,7 @@ import {
   ChannelSettings,
   sendbirdSelectors,
   useSendbirdStateContext,
-} from "@sendbird/uikit-react/";
+} from "@sendbird/uikit-react";
 import "./index.css";
 import CustomizedMessageItem from "./CustomizedMessageItem";
 import CustomizedMessageInput from "./CustomizedMessageInput";
